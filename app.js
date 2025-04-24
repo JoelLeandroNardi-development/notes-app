@@ -1,62 +1,67 @@
-const validator = require('validator');
-const chalk = require('chalk');
 const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
+const notes = require('./notes/index');
 
-// Customize yargs version
-yargs.version('1.1.0');
+yargs(hideBin(process.argv))
+    .scriptName('notes-app')
+    .version('1.1.0')
 
-// Create add command
-yargs.command({
-    command: 'add',
-    describe: 'Add a new note',
-    builder: {
-        title: {
+    .command({
+        command: 'add',
+        describe: 'Add a new note',
+        builder: (yargs) => yargs
+        .option('title', {
             describe: 'Note title',
-            demandOption: true,
-            type: 'string'
-        },
-        body: {
+            type: 'string',
+            demandOption: true
+        })
+        .option('body', {
             describe: 'Note body',
-            demandOption: true,
-            type: 'string'
+            type: 'string',
+            demandOption: true
+        }),
+        handler(argv) {
+        notes.addNote(argv.title, argv.body);
         }
-    },
-    handler: function(argv) {
-        console.log('Title: ' + argv.title);
-        console.log('Body: ' + argv.body);
-    }
-})
+    })
 
-// Create remove command
-yargs.command({
-    command: 'remove',
-    describe: 'Remove a note',
-    builder: {
-        title: {
-            describe: 'Note title'
+    .command({
+        command: 'remove',
+        describe: 'Remove a note',
+        builder: (yargs) => yargs
+        .option('title', {
+            describe: 'Note title',
+            type: 'string',
+            demandOption: true
+        }),
+        handler(argv) {
+        notes.removeNote(argv.title);
         }
-    },
-    handler: function(argv) {
-        console.log('Removing the note!', argv);
-    }
-})
+    })
 
-// Create list command
-yargs.command({
-    command: 'list',
-    describe: 'List your notes',
-    handler: function() {
-        console.log('Listing out all notes!');
-    }
-})
+    .command({
+        command: 'list',
+        describe: 'List your notes',
+        handler() {
+        notes.listNotes();
+        }
+    })
 
-// Create read command
-yargs.command({
-    command: 'read',
-    describe: 'Read a note',
-    handler: function() {
-        console.log('Reading the note!');
-    }
-})
+    .command({
+        command: 'read',
+        describe: 'Read a note',
+        builder: (yargs) => yargs
+        .option('title', {
+            describe: 'Note title',
+            type: 'string',
+            demandOption: true
+        }),
+        handler(argv) {
+        notes.readNote(argv.title);
+        }
+    })
 
-yargs.parse();
+    .demandCommand(1, 'Please specify a command')
+    .strict()
+    .help()
+    .parse();
